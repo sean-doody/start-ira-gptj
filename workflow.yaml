@@ -27,6 +27,7 @@ jobs:
         cd /inputs/repo
         pip3 install --upgrade pip
         pip3 install deepspeed
+        pip3 install mpi4py
         pip3 install tqdm
         pip3 install sklearn
         pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
@@ -38,7 +39,7 @@ jobs:
       gpt-j-01:
         type: dataset
         with:
-          ref: dsknpm89xo6gi7o
+          ref: "..."
   SaveModel:
     uses: create-model@v1
     resources:
