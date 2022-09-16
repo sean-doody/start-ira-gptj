@@ -34,7 +34,9 @@ def main():
                                               eos_token="<|endoftext|>", 
                                               pad_token="<|pad|>")
 
-    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B")
+    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B",
+                                                 revision="float16", 
+                                                 torch_dtype=torch.float16)
     
     model.resize_token_embeddings(len(tokenizer))
     
@@ -68,17 +70,16 @@ def main():
         train_data = GPTDataset(train_tokens)
         
     # prepare trainer:
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
-    
+    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)    
     training_args = TrainingArguments(
         output_dir="./trained-model",
+        do_train=True,
         fp16=True,
-        deepspeed="gpt-j-deepspeed.json",
-        num_train_epochs=3,
+        num_train_epochs=2,
         logging_steps=25,
         save_strategy="epoch",
-        per_device_train_batch_size=15,
-        warmup_steps=20000,
+        per_device_train_batch_size=1,
+        warmup_steps=int(0.10*len(data)),
         weight_decay=0.01
     )
     
