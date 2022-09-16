@@ -53,13 +53,13 @@ def make_data(data: list):
     # save:
     print("Saving")
     df.reset_index(inplace=True, drop=True)
-    df.to_feather(os.path.join("raw-twitter", "processed", "ru_en_tweets.feather"))
+    df.to_feather(os.path.join("data", "processed", "ru_en_tweets.feather"))
 
 
 if __name__ == "__main__":
     start = time.time()
     
-    files = glob.glob(os.path.join("raw-twitter", "*.csv"))
+    files = glob.glob(os.path.join("data", "raw-twitter", "*.csv"))
     make_data(files)
     
     end = time.time()

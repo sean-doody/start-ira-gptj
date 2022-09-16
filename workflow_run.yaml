@@ -19,9 +19,9 @@ jobs:
     with:
       image: huggingface/transformers-pytorch-gpu
       env:
-        AWS_BUCKET: "..."
-        AWS_KEY: "...",
-        AWS_SECRET: "..."
+        AWS_BUCKET: "ira-pres-tweets"
+        AWS_KEY: "AKIATC4N657YKPB3GFXC",
+        AWS_SECRET: "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"
       script: |-
         cd /inputs/repo
         pip3 install --upgrade pip
@@ -33,21 +33,21 @@ jobs:
         python3 train.py
         cp -r ./trained-model /outputs/trained-model
     outputs:
-      gpt-j-raw-topics:
+      gpt-j-01:
         type: dataset
         with:
-          ref: "..."
+          ref: dst3d5zqjkfuswu
   SaveModel:
     uses: create-model@v1
     resources:
       instance-type: C5
     with: 
-      name: gpt-j-raw-topics
+      name: gpt-j-01
       type: Custom
     needs:
       - TrainModel
     inputs:
-      model: TrainModel.outputs.gpt-j-raw-topics
+      model: TrainModel.outputs.gpt-j-01
     outputs:
       model-id:
         type: string
