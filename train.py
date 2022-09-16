@@ -34,9 +34,7 @@ def main():
                                               eos_token="<|endoftext|>", 
                                               pad_token="<|pad|>")
 
-    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B",
-                                                 revision="float16", 
-                                                 torch_dtype=torch.float16)
+    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B")
     
     model.resize_token_embeddings(len(tokenizer))
     
@@ -75,7 +73,6 @@ def main():
     training_args = TrainingArguments(
         output_dir="./trained-model",
         do_train=True,
-        fp16=True,
         num_train_epochs=2,
         logging_steps=25,
         save_strategy="epoch",
