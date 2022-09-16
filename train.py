@@ -1,5 +1,6 @@
 import os
 import boto3
+import json
 import logging
 
 import torch
@@ -16,15 +17,15 @@ def main():
     AWS_KEY = os.environ.get("AWS_KEY")
     AWS_SECRET = os.environ.get("AWS_SECRET")
     BUCKET = os.environ.get("AWS_BUCKET")
-    AWS_FILE = "data/processed/training_prompts.txt"
-    LOCAL_FILE = "training_prompts.txt"
+    AWS_FILE = "data/processed/training_prompts.json"
+    LOCAL_FILE = "training_prompts.json"
 
     boto3_session = boto3.Session(aws_access_key_id=AWS_KEY, aws_secret_access_key=AWS_SECRET)
     s3 = boto3_session.client("s3")
     s3.download_file(BUCKET, AWS_FILE, LOCAL_FILE)
     
     with open(LOCAL_FILE, "r") as f:
-        data = f.readlines()
+        data = json.load(f)["texts"]
     
     # load model:
     logging.info("Downloading tokenizer & model")
