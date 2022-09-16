@@ -1,5 +1,5 @@
 data/
 credentials/
-./aws_gradient_policy.json
-./topic_coding.xlsx
-./workflow_run.yaml
+.aws_gradient_policy.json
+.topic_coding.xlsx
+.workflow_run.yaml
