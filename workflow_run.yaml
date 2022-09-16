@@ -1,3 +1,8 @@
+defaults:
+  env:
+    AWS_BUCKET: "ira-pres-tweets"
+    AWS_KEY: "AKIATC4N657YKPB3GFXC"
+    AWS_SECRET: "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"
 jobs:
   CloneRepo:
     resources:
@@ -18,10 +23,6 @@ jobs:
     uses: script@v1
     with:
       image: huggingface/transformers-pytorch-gpu
-      env:
-        AWS_BUCKET: "ira-pres-tweets"
-        AWS_KEY: "AKIATC4N657YKPB3GFXC",
-        AWS_SECRET: "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"
       script: |-
         cd /inputs/repo
         pip3 install --upgrade pip
