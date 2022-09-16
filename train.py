@@ -71,16 +71,15 @@ def main():
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
     
     training_args = TrainingArguments(
-        output_dir="./trained-model", 
-        overwrite_output_dir=True,
-        do_train=True,
-        num_train_epochs=3,
-        per_device_train_batch_size=15,
-        logging_steps=25,
-        logging_dir="./logs",
-        save_strategy="epoch",
+        output_dir="./trained-model",
         fp16=True,
-        deepspeed="./gpt-j-deepspeed.json"
+        deepspeed="gpt-j-deepspeed.json",
+        num_train_epochs=3,
+        logging_steps=25,
+        save_strategy="epoch",
+        per_device_train_batch_size=24,
+        warmup_steps=20000,
+        weight_decay=0.01
     )
     
     trainer = Trainer(
