@@ -77,7 +77,7 @@ def main():
         num_train_epochs=3,
         logging_steps=25,
         save_strategy="epoch",
-        per_device_train_batch_size=24,
+        per_device_train_batch_size=15,
         warmup_steps=20000,
         weight_decay=0.01
     )
