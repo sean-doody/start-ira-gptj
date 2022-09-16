@@ -34,9 +34,7 @@ def main():
                                               eos_token="<|endoftext|>", 
                                               pad_token="<|pad|>")
 
-    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B",
-                                                 revision="float16",
-                                                 torch_dtype=torch.float16)
+    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B")
     
     model.resize_token_embeddings(len(tokenizer))
     
@@ -81,6 +79,7 @@ def main():
         logging_steps=25,
         logging_dir="./logs",
         save_strategy="epoch",
+        fp16=True,
         deepspeed="./gpt-j-deepspeed.json"
     )
     
