@@ -75,7 +75,7 @@ def main():
     training_args = TrainingArguments(
         output_dir="./trained-model",
         do_train=True,
-        num_train_epochs=2,
+        num_train_epochs=1,
         logging_steps=25,
         save_strategy="epoch",
         per_device_train_batch_size=1,
