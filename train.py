@@ -73,12 +73,14 @@ def main():
     
     training_args = TrainingArguments(
         output_dir=MODEL_NAME,
+        fp16=True,
+        deepspeed="gpt-deepspeed.json",
         do_train=True,
         num_train_epochs=1,
         logging_steps=25,
         save_strategy="epoch",
         per_device_train_batch_size=1,
-        warmup_steps=18473,
+        warmup_steps=10,
         weight_decay=0.01
     )
     
