@@ -20,6 +20,7 @@ def main():
     AWS_FILE = "data/processed/training_prompts.json"
     LOCAL_FILE = "training_prompts.json"
     MODEL_NAME = "gpt-125m"
+    os.mkdir("models")
 
     boto3_session = boto3.Session(aws_access_key_id=AWS_KEY, aws_secret_access_key=AWS_SECRET)
     s3 = boto3_session.client("s3")
@@ -72,7 +73,7 @@ def main():
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)    
     
     training_args = TrainingArguments(
-        output_dir=f"./{MODEL_NAME}",
+        output_dir=f"models/{MODEL_NAME}",
         do_train=True,
         num_train_epochs=1,
         logging_steps=25,
@@ -97,12 +98,12 @@ def main():
     
     # save the model:
     logging.info("Saving Model")
-    trainer.save_model(f"./{MODEL_NAME}")
+    trainer.save_model(f"models/{MODEL_NAME}")
     
     # port to AWS:
-    for root,dirs,files in os.walk(f"./{MODEL_NAME}"):
+    for root,dirs,files in os.walk("models"):
         for file in files:
-            s3.upload_file(os.path.join("models", root, file), BUCKET, file)
+            s3.upload_file(os.path.join(root, file), BUCKET, file)
         
     
 
