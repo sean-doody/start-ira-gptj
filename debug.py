@@ -103,7 +103,7 @@ def main():
     # port to AWS:
     for root,dirs,files in os.walk("models"):
         for file in files:
-            s3.upload_file(os.path.join(root, file), BUCKET, file)
+            s3.upload_file(os.path.join(root, file), BUCKET, root + file)
         
     
 

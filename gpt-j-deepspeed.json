@@ -15,7 +15,8 @@
     },
     "allgather_partitions": true,
     "allgather_bucket_size": 5e8,
-    "contiguous_gradients": true
+    "contiguous_gradients": true,
+    "stage3_gather_16bit_weights_on_model_save": true
   },
   "optimizer": {
     "type": "AdamW",
