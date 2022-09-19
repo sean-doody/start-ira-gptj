@@ -20,7 +20,7 @@ def main():
     AWS_FILE = "data/processed/training_prompts.json"
     LOCAL_FILE = "training_prompts.json"
     MODEL_NAME = os.environ.get("MODEL_NAME")
-    os.mkdir(f"models/{MODEL_NAME}_debug/{MODEL_NAME}")
+    os.makedirs(f"models/{MODEL_NAME}_debug/{MODEL_NAME}")
 
     boto3_session = boto3.Session(aws_access_key_id=AWS_KEY, aws_secret_access_key=AWS_SECRET)
     s3 = boto3_session.client("s3")
