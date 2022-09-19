@@ -19,8 +19,8 @@ def main():
     BUCKET = os.environ.get("AWS_BUCKET")
     AWS_FILE = "data/processed/training_prompts.json"
     LOCAL_FILE = "training_prompts.json"
-    MODEL_NAME = "gpt-125m"
-    os.mkdir("models")
+    MODEL_NAME = os.environ.get("MODEL_NAME")
+    os.mkdir(f"models/{MODEL_NAME}_debug/{MODEL_NAME}")
 
     boto3_session = boto3.Session(aws_access_key_id=AWS_KEY, aws_secret_access_key=AWS_SECRET)
     s3 = boto3_session.client("s3")
@@ -31,12 +31,12 @@ def main():
     
     # load model:
     logging.info("Downloading tokenizer & model")
-    tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-125M",
+    tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-j-6B",
                                               bos_token="<|startoftext|>", 
                                               eos_token="<|endoftext|>", 
                                               pad_token="<|pad|>")
 
-    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-125M")
+    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6B")
     
     model.resize_token_embeddings(len(tokenizer))
     
@@ -73,7 +73,7 @@ def main():
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)    
     
     training_args = TrainingArguments(
-        output_dir=f"models/{MODEL_NAME}",
+        output_dir=f"models/{MODEL_NAME}_debug/{MODEL_NAME}",
         do_train=True,
         num_train_epochs=1,
         logging_steps=25,
@@ -98,7 +98,7 @@ def main():
     
     # save the model:
     logging.info("Saving Model")
-    trainer.save_model(f"models/{MODEL_NAME}")
+    trainer.save_model(f"models/{MODEL_NAME}_debug/{MODEL_NAME}")
     
     # port to AWS:
     for root,dirs,files in os.walk("models"):
