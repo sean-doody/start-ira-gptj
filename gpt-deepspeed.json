@@ -3,10 +3,10 @@
   "fp16": {
     "enabled": true,
     "min_loss_scale": 1,
-    "opt_level": "O3"
+    "opt_level": "O2"
   },
   "zero_optimization": {
-    "stage": 3,
+    "stage": 2,
     "offload_param": {
       "device": "cpu"
     },
@@ -15,8 +15,7 @@
     },
     "allgather_partitions": true,
     "allgather_bucket_size": 5e8,
-    "contiguous_gradients": true,
-    "stage3_gather_16bit_weights_on_model_save": true
+    "contiguous_gradients": true
   },
   "optimizer": {
     "type": "AdamW",
@@ -34,7 +33,7 @@
     "params": {
       "warmup_min_lr": 0,
       "warmup_max_lr": 5e-05,
-      "warmup_num_steps": 50
+      "warmup_num_steps": 18473
     }
   }
 }
