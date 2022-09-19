@@ -79,7 +79,7 @@ def main():
         num_train_epochs=1,
         logging_steps=25,
         save_strategy="epoch",
-        per_device_train_batch_size=1,
+        per_device_train_batch_size=15,
         warmup_steps=10,
         weight_decay=0.01
     )
