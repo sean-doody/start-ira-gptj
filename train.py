@@ -82,7 +82,9 @@ def main():
         per_device_eval_batch_size=4,
         warmup_steps=int(0.10*len(train_tokens)),
         weight_decay=0.01,
-        learning_rate=LEARNING_RATE
+        learning_rate=LEARNING_RATE,
+        load_best_model_at_end=True,
+        save_total_limit=2
     )
     
     trainer = Trainer(
