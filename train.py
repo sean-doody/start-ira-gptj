@@ -27,7 +27,7 @@ def main():
     s3.download_file(BUCKET, AWS_FILE, LOCAL_FILE)
     
     with open(LOCAL_FILE, "r") as f:
-        data = json.load(f)["texts"][:500]
+        data = json.load(f)["texts"]
     
     # load model:
     hf_model = "gpt-neo-2.7b"
