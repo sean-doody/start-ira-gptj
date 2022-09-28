@@ -18,8 +18,8 @@ def main():
     AWS_KEY = os.environ.get("AWS_KEY")
     AWS_SECRET = os.environ.get("AWS_SECRET")
     BUCKET = os.environ.get("AWS_BUCKET")
-    AWS_FILE = "data/processed/training_prompts.json"
-    LOCAL_FILE = "training_prompts.json"
+    AWS_FILE = "data/processed/training_sample.json"
+    LOCAL_FILE = "training_sample.json"
     MODEL_NAME = "gpt-neo-2.7b-eval"
 
     boto3_session = boto3.Session(aws_access_key_id=AWS_KEY, aws_secret_access_key=AWS_SECRET)
@@ -30,15 +30,15 @@ def main():
         data = json.load(f)["texts"][:500]
     
     # load model:
-    logging.info("Downloading tokenizer & model")
     hf_model = "gpt-neo-2.7b"
+    logging.info("Downloading & initializing tokenizer")
     tokenizer = AutoTokenizer.from_pretrained(f"EleutherAI/{hf_model}",
                                               bos_token="<|startoftext|>", 
                                               eos_token="<|endoftext|>", 
                                               pad_token="<|pad|>")
 
+    logging.info("Downloading & initializing model")
     model = AutoModelForCausalLM.from_pretrained(f"EleutherAI/{hf_model}")
-    
     model.resize_token_embeddings(len(tokenizer))
     
     # pytorch dataset:
