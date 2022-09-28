@@ -2,6 +2,7 @@ import os
 import boto3
 import json
 import logging
+from tqdm import tqdm
 
 import torch
 from torch.utils.data import Dataset
@@ -19,7 +20,7 @@ def main():
     BUCKET = os.environ.get("AWS_BUCKET")
     AWS_FILE = "data/processed/training_prompts.json"
     LOCAL_FILE = "training_prompts.json"
-    MODEL_NAME = "gpt-27b"
+    MODEL_NAME = "gpt-neo-2.7b-eval"
 
     boto3_session = boto3.Session(aws_access_key_id=AWS_KEY, aws_secret_access_key=AWS_SECRET)
     s3 = boto3_session.client("s3")
@@ -30,65 +31,68 @@ def main():
     
     # load model:
     logging.info("Downloading tokenizer & model")
-    tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B",
+    hf_model = "gpt-neo-2.7b"
+    tokenizer = AutoTokenizer.from_pretrained(f"EleutherAI/{hf_model}",
                                               bos_token="<|startoftext|>", 
                                               eos_token="<|endoftext|>", 
                                               pad_token="<|pad|>")
 
-    model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-2.7B")
+    model = AutoModelForCausalLM.from_pretrained(f"EleutherAI/{hf_model}")
     
     model.resize_token_embeddings(len(tokenizer))
     
-    # prepare dataset:
+    # pytorch dataset:
     class GPTDataset(Dataset):
+        def __init__(self, tweets, tokenizer, max_length):
+            self.input_ids = []
+            self.attn_masks = []
+            self.labels = []
+            for tweet in tqdm(tweets):
+                encodings_dict = tokenizer(tweet, truncation=True, max_length=max_length, padding="max_length")
+                self.input_ids.append(torch.tensor(encodings_dict['input_ids']))
+                self.attn_masks.append(torch.tensor(encodings_dict['attention_mask']))
 
-        def __init__(self, encodings):
-
-            self.encodings = encodings
-            self.labels = None
-            
         def __len__(self):
-            return len(self.encodings["input_ids"])
+            return len(self.input_ids)
 
         def __getitem__(self, idx):
-            item = {key: torch.tensor(val[idx]) for key,val in self.encodings.items()}
-            return item
+            return self.input_ids[idx], self.attn_masks[idx]
     
     
-    validation_set = False
-
     logging.info("Preparing datasets")
-    if validation_set:
-        train, test = train_test_split(data, test_size=.20, random_state=42)
-        train_tokens = tokenizer(train, padding=True, truncation=True, max_length=512)
-        test_tokens = tokenizer(test, padding=True, truncation=True, max_length=512)
-        train_data = GPTDataset(train_tokens)
-        test_data = GPTDataset(test_tokens)
-    else:
-        train_tokens = tokenizer(data, padding=True, truncation=True, max_length=512)
-        train_data = GPTDataset(train_tokens)
-        
-    # prepare trainer:
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)    
+    logging.info("Estimating max length")
+    max_len = max([len(tokenizer.encode(tweet)) for tweet in tqdm(data)])
+    
+    logging.info("Creating train and test sets")
+    train, test = train_test_split(data, test_size=.10, random_state=42)
+    train_tokens = GPTDataset(train, tokenizer, max_len)
+    test_tokens = GPTDataset(test, tokenizer, max_len)
+    
+    # hyperparameters:
+    LEARNING_RATE = 1.372e-4
+    N_EPOCHS = 3
     
     training_args = TrainingArguments(
         output_dir=MODEL_NAME,
-        fp16=True,
-        deepspeed="gpt-deepspeed.json",
-        do_train=True,
-        num_train_epochs=1,
-        logging_steps=25,
+        num_train_epochs=N_EPOCHS,
+        logging_steps=100,
         save_strategy="epoch",
-        per_device_train_batch_size=15,
-        warmup_steps=10,
-        weight_decay=0.01
+        evaluation_strategy="epoch",
+        per_device_train_batch_size=4,
+        per_device_eval_batch_size=4,
+        warmup_steps=int(0.10*len(train_tokens)),
+        weight_decay=0.01,
+        learning_rate=LEARNING_RATE
     )
     
     trainer = Trainer(
         model=model,
         args=training_args,
-        data_collator=data_collator,
-        train_dataset=train_data
+        data_collator=lambda data: {"input_ids": torch.stack([f[0] for f in data]),
+                                    "attention_mask": torch.stack([f[1] for f in data]),
+                                    "labels": torch.stack([f[0] for f in data])},
+        train_dataset=train_tokens,
+        eval_dataset=test_tokens
     )
     
     # train model:
@@ -97,12 +101,12 @@ def main():
     
     # save the model:
     logging.info("Saving Model")
-    trainer.save_model(MODEL_NAME)
+    trainer.save_model()
     
     logging.info("Uploading to AWS")
     for root,dirs,files in os.walk(MODEL_NAME):
-        for file in files:
-            s3.upload_file(os.path.join(root, file), BUCKET, "models/" + root + file)
+        for file in tqdm(files):
+            s3.upload_file(os.path.join(root, file), BUCKET, os.path.join("models", root, file))
 
 
 if __name__ == "__main__":
