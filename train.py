@@ -30,7 +30,7 @@ def main():
         data = json.load(f)["texts"]
     
     # load model:
-    hf_model = "gpt-neo-2.7b"
+    hf_model = "gpt-neo-2.7B"
     logging.info("Downloading & initializing tokenizer")
     tokenizer = AutoTokenizer.from_pretrained(f"EleutherAI/{hf_model}",
                                               bos_token="<|startoftext|>", 
